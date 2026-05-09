@@ -1,0 +1,32 @@
+name: Daily data refresh
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # 1 PM UTC every day
+  workflow_dispatch:         # allow manual trigger from GitHub UI
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Fetch latest data
+        run: python src/ingest.py --incremental
+
+      - name: Commit updated parquet files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/raw/
+          git diff --staged --quiet || git commit -m "auto: daily data refresh $(date +%F)"
+          git push
