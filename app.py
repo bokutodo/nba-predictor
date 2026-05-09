@@ -11,6 +11,41 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.predict import predict_matchup, explain_prediction, get_team_stats
 from src.viz import plot_h2h, plot_radar
 
+# --- IDENTITY MAPPING ---
+TEAM_DATA = {
+    "Atlanta Hawks": {"color": "#E03A3E", "logo": "https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg"},
+    "Boston Celtics": {"color": "#007A33", "logo": "https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg"},
+    "Brooklyn Nets": {"color": "#000000", "logo": "https://cdn.nba.com/logos/nba/1610612751/primary/L/logo.svg"},
+    "Charlotte Hornets": {"color": "#1D1160", "logo": "https://cdn.nba.com/logos/nba/1610612766/primary/L/logo.svg"},
+    "Chicago Bulls": {"color": "#CE1141", "logo": "https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg"},
+    "Cleveland Cavaliers": {"color": "#860038", "logo": "https://cdn.nba.com/logos/nba/1610612739/primary/L/logo.svg"},
+    "Dallas Mavericks": {"color": "#00538C", "logo": "https://cdn.nba.com/logos/nba/1610612742/primary/L/logo.svg"},
+    "Denver Nuggets": {"color": "#0E2240", "logo": "https://cdn.nba.com/logos/nba/1610612743/primary/L/logo.svg"},
+    "Detroit Pistons": {"color": "#C8102E", "logo": "https://cdn.nba.com/logos/nba/1610612765/primary/L/logo.svg"},
+    "Golden State Warriors": {"color": "#1D428A", "logo": "https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg"},
+    "Houston Rockets": {"color": "#CE1141", "logo": "https://cdn.nba.com/logos/nba/1610612745/primary/L/logo.svg"},
+    "Indiana Pacers": {"color": "#FDB927", "logo": "https://cdn.nba.com/logos/nba/1610612754/primary/L/logo.svg"},
+    "LA Clippers": {"color": "#C8102E", "logo": "https://cdn.nba.com/logos/nba/1610612746/primary/L/logo.svg"},
+    "Los Angeles Lakers": {"color": "#552583", "logo": "https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg"},
+    "Memphis Grizzlies": {"color": "#5D76A9", "logo": "https://cdn.nba.com/logos/nba/1610612763/primary/L/logo.svg"},
+    "Miami Heat": {"color": "#98002E", "logo": "https://cdn.nba.com/logos/nba/1610612748/primary/L/logo.svg"},
+    "Milwaukee Bucks": {"color": "#00471B", "logo": "https://cdn.nba.com/logos/nba/1610612749/primary/L/logo.svg"},
+    "Minnesota Timberwolves": {"color": "#0C2340", "logo": "https://cdn.nba.com/logos/nba/1610612750/primary/L/logo.svg"},
+    "New Orleans Pelicans": {"color": "#0C2340", "logo": "https://cdn.nba.com/logos/nba/1610612740/primary/L/logo.svg"},
+    "New York Knicks": {"color": "#006BB6", "logo": "https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg"},
+    "Oklahoma City Thunder": {"color": "#007AC1", "logo": "https://cdn.nba.com/logos/nba/1610612760/primary/L/logo.svg"},
+    "Orlando Magic": {"color": "#0077C0", "logo": "https://cdn.nba.com/logos/nba/1610612753/primary/L/logo.svg"},
+    "Philadelphia 76ers": {"color": "#006BB6", "logo": "https://cdn.nba.com/logos/nba/1610612755/primary/L/logo.svg"},
+    "Phoenix Suns": {"color": "#1D1160", "logo": "https://cdn.nba.com/logos/nba/1610612756/primary/L/logo.svg"},
+    "Portland Trail Blazers": {"color": "#E03A3E", "logo": "https://cdn.nba.com/logos/nba/1610612757/primary/L/logo.svg"},
+    "Sacramento Kings": {"color": "#5A2D81", "logo": "https://cdn.nba.com/logos/nba/1610612758/primary/L/logo.svg"},
+    "San Antonio Spurs": {"color": "#C4CED4", "logo": "https://cdn.nba.com/logos/nba/1610612759/primary/L/logo.svg"},
+    "Toronto Raptors": {"color": "#CE1141", "logo": "https://cdn.nba.com/logos/nba/1610612761/primary/L/logo.svg"},
+    "Utah Jazz": {"color": "#002B5C", "logo": "https://cdn.nba.com/logos/nba/1610612762/primary/L/logo.svg"},
+    "Washington Wizards": {"color": "#002B5C", "logo": "https://cdn.nba.com/logos/nba/1610612764/primary/L/logo.svg"}
+}
+DEFAULT_LOGO = "https://cdn.nba.com/logos/nba/nba-logoman_75.png"
+
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="NBA Playoffs Predictor",
@@ -175,13 +210,13 @@ html, body, [class*="css"] {
     display: flex;
 }
 .prob-bar-home {
-    background: #ff6b35;
     height: 100%;
     transition: width 0.6s ease;
 }
 .prob-bar-away {
     background: #3a8eff;
     height: 100%;
+    flex-grow: 1;
 }
 
 /* Section headers */
@@ -209,7 +244,6 @@ html, body, [class*="css"] {
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #555;
     padding: 6px 10px;
     text-align: center;
     border-bottom: 1px solid #1e1e1e;
@@ -343,8 +377,14 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    home_team   = st.selectbox("Home team",   all_teams, index=0)
-    away_team   = st.selectbox("Away team",   all_teams, index=min(1, len(all_teams)-1))
+# --- SIDEBAR LOGO SELECTORS ---
+    col_h1, col_h2 = st.sidebar.columns([1, 4])
+    home_team = col_h2.selectbox("Home team", all_teams, index=0)
+    col_h1.image(TEAM_DATA.get(home_team, {}).get("logo", DEFAULT_LOGO), width=40)
+
+    col_a1, col_a2 = st.sidebar.columns([1, 4])
+    away_team = col_a2.selectbox("Away team", all_teams, index=1)
+    col_a1.image(TEAM_DATA.get(away_team, {}).get("logo", DEFAULT_LOGO), width=40)
     season_year = st.selectbox("Season",      seasons,   index=0)
 
     st.markdown("---")
@@ -415,6 +455,15 @@ with tab_pred:
         away_stats["DRTG"] += away_drtg_adj
 
         prob, _   = predict_matchup(home_stats, away_stats)
+        # --- DEFINE ACTIVE THEME ---
+        h_color = TEAM_DATA.get(home_team, {}).get("color", "#ff6b35")
+        a_color = TEAM_DATA.get(away_team, {}).get("color", "#3a8eff")
+        h_logo  = TEAM_DATA.get(home_team, {}).get("logo", DEFAULT_LOGO)
+        a_logo  = TEAM_DATA.get(away_team, {}).get("logo", DEFAULT_LOGO)
+
+        # Winner-specific identity
+        win_color = h_color if prob >= 0.5 else a_color
+        win_logo  = h_logo if prob >= 0.5 else a_logo
         shap_df   = explain_prediction(home_stats, away_stats)
 
         winner    = home_team if prob >= 0.5 else away_team
@@ -425,49 +474,37 @@ with tab_pred:
         home_bar  = f"{prob*100:.1f}%"
         away_bar  = f"{(1-prob)*100:.1f}%"
 
-        # Winner banner
+        # --- THEMED WINNER BANNER ---
         st.markdown(f"""
-        <div class='winner-banner'>
+        <div class='winner-banner' style='border-left: 4px solid {win_color}; background: rgba(20,20,20,0.8);'>
+            <img src='{win_logo}' style='width: 55px; margin-right: 15px;'>
             <div>
                 <div class='winner-label'>Predicted winner</div>
-                <div class='winner-name'>{winner}</div>
-            </div>
-            <div style='margin-left:auto; text-align:right;'>
-                <div class='winner-label'>Confidence</div>
-                <div style='font-family: Barlow Condensed, sans-serif; font-size: 1.4rem;
-                            font-weight: 700; color: #ff6b35;'>{conf:.0%} &nbsp;
-                    <span style='font-size:0.9rem; color:#666;'>{conf_label}</span>
-                </div>
+                <div class='winner-name' style='color: {win_color};'>{winner}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Probability bar
+        # --- THEMED PROBABILITY BAR ---
         st.markdown(f"""
         <div class='prob-wrap'>
             <div class='prob-teams'>
-                <div>
-                    <span class='prob-team-name' style='color:#ff6b35;'>
-                        {home_team.split()[-1]}
-                    </span>
-                    <span style='font-size:0.72rem; color:#555; margin-left:6px;'>HOME</span>
+                <div style='display:flex; align-items:center; gap:10px;'>
+                    <img src='{h_logo}' width='28'>
+                    <span class='prob-team-name' style='color:{h_color};'>{home_team.split()[-1]}</span>
                 </div>
-                <div>
-                    <span style='font-size:0.72rem; color:#555; margin-right:6px;'>AWAY</span>
-                    <span class='prob-team-name' style='color:#3a8eff;'>
-                        {away_team.split()[-1]}
-                    </span>
+                <div style='display:flex; align-items:center; gap:10px;'>
+                    <span class='prob-team-name' style='color:{a_color};'>{away_team.split()[-1]}</span>
+                    <img src='{a_logo}' width='28'>
                 </div>
             </div>
-            <div class='prob-bar-outer'>
-                <div class='prob-bar-home' style='width:{home_bar};'></div>
-                <div class='prob-bar-away' style='width:{away_bar};'></div>
+            <div class='prob-bar-outer' style='display: flex; width: 100%; background: #222; height: 12px; border-radius: 6px; overflow: hidden;'>
+                <div style='width:{home_bar}; background:{h_color}; height:100%;'></div>
+                <div style='flex-grow:1; background:{a_color}; height:100%;'></div>
             </div>
             <div class='prob-teams' style='margin-top:5px;'>
-                <span style='font-family: Barlow Condensed, sans-serif; font-size:1.2rem;
-                             font-weight:700; color:#ff6b35;'>{home_pct}</span>
-                <span style='font-family: Barlow Condensed, sans-serif; font-size:1.2rem;
-                             font-weight:700; color:#3a8eff;'>{away_pct}</span>
+                <span style='font-family: Barlow Condensed, sans-serif; font-size:1.2rem; font-weight:700; color:{h_color};'>{home_pct}</span>
+                <span style='font-family: Barlow Condensed, sans-serif; font-size:1.2rem; font-weight:700; color:{a_color};'>{away_pct}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -556,8 +593,8 @@ with tab_pred:
             <thead>
                 <tr>
                     <th style='text-align:left;'>Stat</th>
-                    <th style='color:#ff6b35;'>{home_name_short} (H)</th>
-                    <th style='color:#3a8eff;'>{away_name_short} (A)</th>
+                    <th style='color:{h_color};'>{home_name_short} (H)</th>
+                    <th style='color:{a_color};'>{away_name_short} (A)</th>
                 </tr>
             </thead>
             <tbody>{rows_html}</tbody>
@@ -597,7 +634,8 @@ with tab_pred:
             }
             top["label"] = top["feature"].map(name_map).fillna(top["feature"])
             top["color"] = top["shap_value"].apply(
-                lambda v: "#ff6b35" if v > 0 else "#3a8eff")
+                lambda v: h_color if v > 0 else a_color
+                )
 
             fig, ax = plt.subplots(figsize=(5.5, 4.2))
             fig.patch.set_facecolor("#0d0d0d")
@@ -612,8 +650,8 @@ with tab_pred:
                 spine.set_color("#1e1e1e")
             ax.xaxis.label.set_color("#555")
             # Legend
-            p1 = mpatches.Patch(color="#ff6b35", label=f"Favours {home_name_short}")
-            p2 = mpatches.Patch(color="#3a8eff", label=f"Favours {away_name_short}")
+            p1 = mpatches.Patch(color=h_color, label=f"Favours {home_name_short}")
+            p2 = mpatches.Patch(color=a_color, label=f"Favours {away_name_short}")
             ax.legend(handles=[p1, p2], fontsize=7, framealpha=0,
                       labelcolor="#888", loc="lower right")
             fig.tight_layout(pad=1.2)
