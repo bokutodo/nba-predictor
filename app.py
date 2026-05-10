@@ -51,7 +51,7 @@ st.set_page_config(
     page_title="NBA Playoffs Predictor",
     page_icon="🏀",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 # ── Global styles ─────────────────────────────────────────────────────────────
@@ -63,51 +63,35 @@ html, body, [class*="css"] {
     font-family: 'Barlow', sans-serif;
 }
 
-/* --- HEADER CLEANUP --- */
-/* Hide the entire right-side menu (GitHub, Main Menu, etc.) */
-[data-testid="stHeaderActionElements"] {
+/* Target the footer by its role and test-id to ensure it disappears on mobile */
+footer, [data-testid="stFooter"] {
+    display: none !important;
+    height: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    visibility: hidden !important;
+}
+
+/* Hide the 'viewerBadge' which is the mobile specific 'Made with Streamlit' button */
+#stDecoration, [data-testid="stDecoration"] {
     display: none !important;
 }
 
-/* Keep the header area but make it transparent */
+/* If you don't mind the header, let's just make sure it's functional */
 header {
     background-color: rgba(0,0,0,0) !important;
 }
 
-/* Ensure the sidebar chevron (toggle) is visible and styled */
-button[kind="header"] {
-    display: flex !important;
-    visibility: visible !important;
-    color: #f0f0f0 !important;
-}
-
-/* --- FOOTER FIX (PC & MOBILE) --- */
-/* This targets all possible versions of the Streamlit branding */
-footer {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-#MainMenu {
-    display: none !important;
-}
-
-/* Specific fix for mobile where the footer can sometimes persist in a different container */
-[data-testid="stStatusWidget"] {
-    display: none !important;
-}
-
-/* Removes the extra space at the bottom of the page on mobile */
-.stApp {
-    margin-bottom: -2rem !important;
-}@media (max-width: 768px) {
-    .block-container {
-        padding: 1rem 1rem 3rem !important;
-    }
-}
+/* Ensure the sidebar button is always visible against the dark background */
 button[kind="header"] {
     visibility: visible !important;
-    color: #f0f0f0 !important;
+    color: white !important;
+    z-index: 999999;
+}
+
+/* This removes the bottom padding that usually holds the footer space */
+.main .block-container {
+    padding-bottom: 0rem !important;
 }
 
 /* App title */
