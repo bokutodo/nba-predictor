@@ -63,10 +63,44 @@ html, body, [class*="css"] {
     font-family: 'Barlow', sans-serif;
 }
 
-/* Hide default streamlit chrome */
-footer { visibility: hidden; }
-header { background-color: rgba(0,0,0,0) !important; } /* Make header transparent but functional */
-@media (max-width: 768px) {
+/* --- HEADER CLEANUP --- */
+/* Hide the entire right-side menu (GitHub, Main Menu, etc.) */
+[data-testid="stHeaderActionElements"] {
+    display: none !important;
+}
+
+/* Keep the header area but make it transparent */
+header {
+    background-color: rgba(0,0,0,0) !important;
+}
+
+/* Ensure the sidebar chevron (toggle) is visible and styled */
+button[kind="header"] {
+    display: flex !important;
+    visibility: visible !important;
+    color: #f0f0f0 !important;
+}
+
+/* --- FOOTER FIX (PC & MOBILE) --- */
+/* This targets all possible versions of the Streamlit branding */
+footer {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#MainMenu {
+    display: none !important;
+}
+
+/* Specific fix for mobile where the footer can sometimes persist in a different container */
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+/* Removes the extra space at the bottom of the page on mobile */
+.stApp {
+    margin-bottom: -2rem !important;
+}@media (max-width: 768px) {
     .block-container {
         padding: 1rem 1rem 3rem !important;
     }
