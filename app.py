@@ -64,8 +64,17 @@ html, body, [class*="css"] {
 }
 
 /* Hide default streamlit chrome */
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding: 2rem 2.5rem 4rem; max-width: 1100px; }
+footer { visibility: hidden; }
+header { background-color: rgba(0,0,0,0) !important; } /* Make header transparent but functional */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 1rem 1rem 3rem !important;
+    }
+}
+button[kind="header"] {
+    visibility: visible !important;
+    color: #f0f0f0 !important;
+}
 
 /* App title */
 .app-title {
